@@ -1,41 +1,27 @@
-import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-router-dom";
-
-function Home() {
-  return <h2>Home</h2>;
-}
-
-function About() {
-  return <h2>About (Public)</h2>;
-}
-
-function Dashboard() {
-  return <h2>Dashboard (Private)</h2>;
-}
-
-function PrivateRoute({ isAuthenticated, children }) {
-  return isAuthenticated ? children : <Navigate to="/" />;
-}
+import { useEffect, useState } from "react";
+import { BrowserRouter as Router } from "react-router-dom";
+import AppRoutes from "./routes/AppRoutes";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
-  // Load auth state from localStorage on app load
   useEffect(() => {
     const storedAuth = localStorage.getItem("isAuthenticated");
     if (storedAuth === "true") {
       setIsAuthenticated(true);
     }
+    setAuthChecked(true);
   }, []);
 
   const handleLogin = () => {
-    setIsAuthenticated(true);
     localStorage.setItem("isAuthenticated", "true");
+    setIsAuthenticated(true);
   };
 
   const handleLogout = () => {
-    setIsAuthenticated(false);
     localStorage.removeItem("isAuthenticated");
+    setIsAuthenticated(false);
   };
 
   return (
@@ -43,9 +29,9 @@ function App() {
       <div>
         <nav>
           <ul>
-            <li><Link to="/">Home</Link></li>
-            <li><Link to="/about">About</Link></li>
-            <li><Link to="/dashboard">Dashboard</Link></li>
+            <li><a href="/">Home</a></li>
+            <li><a href="/about">About</a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
           </ul>
         </nav>
 
@@ -55,18 +41,10 @@ function App() {
           <button onClick={handleLogout}>Log Out</button>
         )}
 
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute isAuthenticated={isAuthenticated}>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
-        </Routes>
+        {/* Show routes only after checking localStorage */}
+        {authChecked && (
+          <AppRoutes isAuthenticated={isAuthenticated} />
+        )}
       </div>
     </Router>
   );
